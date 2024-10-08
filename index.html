@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="vendor\materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+</head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CXPE1MX3HS"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-CXPE1MX3HS');
+</script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        display: flex;
+        /* Center the container horizontally */
+        justify-content: center;
+    }
+
+    .center-column {
+        text-align: center;
+        /* Center elements within the container */
+    }
+
+    #question {
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 30px;
+    }
+
+    #choices {
+        display: flex;
+        flex-wrap: wrap;
+        /* Wrap choices if needed */
+        margin-bottom: 10px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    #choices button {
+        background-color: rgb(220, 217, 217);
+        /* Default button color */
+        color: black;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        /* Indicate clickable cursor */
+        margin: 5px;
+        /* Add space between choices */
+        transition: background-color 0.3s;
+        /* Add smooth color transition on hover */
+    }
+
+    #choices button:hover {
+        background-color: darkgray;
+        /* Button color on hover */
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        /* Add subtle shadow on hover */
+    }
+
+    #choices button:active {
+        background-color: rgb(133, 133, 133);
+        color: rgb(206, 206, 206);
+    }
+
+    #submit-btn {
+        background-color: black;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    #submit-btn:hover {
+        background-color: rgb(57, 57, 57);
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #feedback.correct {
+        color: black;
+        /* Default green for correct answer */
+        margin-top: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 30px;
+    }
+
+    #feedback.incorrect {
+        color: black;
+        /* Red for incorrect answer */
+        margin: 20px 0;
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-size: 30px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    #prev-question {
+        background-color: black;
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    #next-question {
+        background-color: black;
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table th {
+        background-color: rgb(40, 40, 40);
+        color: white;
+        padding: 10px;
+    }
+
+    table td {
+        border: 1px solid black;
+        padding: 10px;
+    }
+
+    #quiz-container {
+        width: 100%;
+        border: 1px solid rgb(70, 70, 70);
+        padding: 20px;
+        border-radius: 5px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+
+    }
+
+    .small {
+        font-size: 13px;
+        color: gray;
+
+    }
+
+    input {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        border: 1px solid rgb(70, 70, 70);
+        /*increase check box size*/
+        transform: scale(1.5);
+    }
+
+    .checkbox-container {
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        border: 1px solid rgb(70, 70, 70);
+        justify-content: center;
+        text-align: center;
+    }
+
+    .small {
+        font-size: 13px;
+        color: gray;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        var questions1 = [
+            {
+                problem: "What type of programming language is R primarily classified as?",
+                choices: "Object-oriented///Procedural///Scripting///Functional///Query",
+                answer: "Functional",
+                select: "",
+                explain: "R is primarily a functional programming language, where computations are treated as the evaluation of functions.  While it has object-oriented features, its core design centers around functions.",
+                state: false
+            },
+            {
+                problem: "Which of the following is NOT a common Integrated Development Environment (IDE) for R programming?",
+                choices: "RStudio///Visual Studio Code///Eclipse///Jupyter Notebook///Notepad++",
+                answer: "Notepad++",
+                select: "",
+                explain: "While Notepad++ is a general-purpose text editor, it lacks the specific features and integrations that make RStudio, Visual Studio Code, Eclipse (with plugins), and Jupyter Notebook suitable IDEs for R development.",
+                state: false
+            },
+            {
+                problem: "What function is used to clear the R console?",
+                choices: "cls()///clear()///rm(list = ls())///flush.console()///empty()",
+                answer: "rm(list = ls())",
+                select: "",
+                explain: "The function `rm(list = ls())` removes all objects from the current R environment, effectively clearing the console. `cls()` and `clear()` might work in specific terminal environments, but not consistently within R.",
+                state: false
+            },
+            {
+                problem: "You want to import data from a comma-separated value (CSV) file named 'health_data.csv' into an R data frame. What is the most appropriate function to use?",
+                choices: "read.csv('health_data.csv')///scan('health_data.csv')///load('health_data.csv')///import('health_data.csv')///data('health_data.csv')",
+                answer: "read.csv('health_data.csv')",
+                select: "",
+                explain: "`read.csv()` is specifically designed to import data from CSV files into R data frames.",
+                state: false
+            },
+            {
+                problem: "After importing your data, you want to get a concise overview of its structure, including variable types and a glimpse of the first few rows. What function serves this purpose?",
+                choices: "str()///summary()///head()///dim()///names()",
+                answer: "str()",
+                select: "",
+                explain: "The `str()` function provides a compact display of a data object's structure—showing variable types, dimensions (if applicable), and a preview of data.",
+                state: false
+            },
+            {
+                problem: "To create a new variable in a data frame 'patient_records' based on an existing variable, 'age', categorized into 'Young', 'Middle-Aged', and 'Senior', which function from the 'dplyr' package would you likely use?",
+                choices: "arrange()///filter()///mutate()///select()///summarise()",
+                answer: "mutate()",
+                select: "",
+                explain: "`mutate()` is used to add new variables (columns) to a data frame based on existing data.  You'd apply logical conditions within `mutate()` to categorize the 'age' variable.",
+                state: false
+            },
+            {
+                problem: "Which function is used to set the working directory in R, ensuring R can find your data files and save outputs to the correct location?",
+                choices: "setwd()///getwd()///dir.create()///file.path()///chdir()",
+                answer: "setwd()",
+                select: "",
+                explain: "`setwd()` is used to set R's working directory, which is crucial for file input and output operations.",
+                state: false
+            },
+            {
+                problem: "Which data visualization package is the most popular and widely used within the R ecosystem?",
+                choices: "lattice///ggplot2///base graphics///grid///plotly",
+                answer: "ggplot2",
+                select: "",
+                explain: "ggplot2 is the dominant data visualization package in R due to its flexibility, layered approach to building plots (Grammar of Graphics), and visually appealing aesthetics.",
+                state: false
+            },
+            {
+                problem: "When constructing a scatterplot using 'ggplot2' to examine the relationship between a patient's 'BMI' (on the x-axis) and 'blood_pressure' (on the y-axis) within a data frame named 'patient_data', which code snippet correctly specifies the aesthetics?",
+                choices: "ggplot(patient_data, aes(x = 'BMI', y = 'blood_pressure')) + geom_point()///ggplot(patient_data, aes(BMI, blood_pressure)) + geom_point()///ggplot(aes(x = BMI, y = blood_pressure), data = patient_data) + geom_point()///ggplot(patient_data) + aes(x = BMI, y = blood_pressure) + geom_point()///ggplot() + geom_point(aes(x = BMI, y = blood_pressure), data = patient_data)",
+                answer: "ggplot(patient_data, aes(x = BMI, y = blood_pressure)) + geom_point()",
+                select: "",
+                explain: "Within the `ggplot()` function, the `aes()` function (short for aesthetics) maps variables to visual elements. 'BMI' on the x-axis and 'blood_pressure' on the y-axis are correctly specified within `aes()`, followed by `geom_point()` for a scatterplot.",
+                state: false
+            },
+            {
+                problem: "Which R function would you use to rearrange the rows of a data frame named 'clinical_trials' in descending order based on a variable called 'recovery_time'?",
+                choices: "order()///sort()///rank()///arrange(clinical_trials, desc(recovery_time))///arrange(recovery_time, desc(), clinical_trials)",
+                answer: "arrange(clinical_trials, desc(recovery_time))",
+                select: "",
+                explain: "Within the 'dplyr' package, `arrange()` is used to sort rows.  We specify the data frame `clinical_trials` and use `desc(recovery_time)` to indicate descending order.",
+                state: false
+            },
+            {
+                problem: "You need to subset your data frame 'hospital_admissions' to include only patients who are older than 65. Which 'dplyr' function is the most efficient for this task?",
+                choices: "select()///filter()///mutate()///arrange()///summarise()",
+                answer: "filter()",
+                select: "",
+                explain: "The `filter()` function in the 'dplyr' package allows you to subset data based on conditions.  You'd specify `age > 65` (assuming an 'age' variable) within `filter()` to select the desired patients.",
+                state: false
+            },
+            {
+                problem: "What data type in R is used to store categorical variables with a fixed set of possible values (levels)?",
+                choices: "character///numeric///integer///factor///logical",
+                answer: "factor",
+                select: "",
+                explain: "Factors are designed to represent categorical data.  They store a vector of values along with associated levels, which can be ordered or unordered.",
+                state: false
+            },
+            {
+                problem: "A variable 'date_of_birth' in your data frame is currently stored as a character string. You want to convert it to a proper date format. Which function is the most suitable?",
+                choices: "date()///as.Date()///strptime()///chron()///lubridate::ymd()",
+                answer: "as.Date()",
+                select: "",
+                explain: "`as.Date()` is a common function to parse character strings and convert them into dates.  You may need to specify the date format using `format` if the default format doesn't match your data.",
+                state: false
+            },
+            {
+                problem: "Which of these data types represents data in a tabular format, similar to a spreadsheet, with rows for observations and columns for variables?",
+                choices: "list///matrix///vector///array///data frame",
+                answer: "data frame",
+                select: "",
+                explain: "Data frames are the fundamental data structure for working with tabular data in R.  They can store different data types in their columns (numeric, character, etc.), making them very versatile for statistical analysis.",
+                state: false
+            },
+            {
+                problem: "You've been provided an Excel file (.xlsx) containing genetic data.  What package and function would you use to read this data into R?",
+                choices: "`readxl` package with `read_excel()`///`xlsx` package with `read.xlsx()`///`gdata` package with `read.xls()`///`readr` package with `read_excel()`///`base` package with `read.table()`",
+                answer: "`readxl` package with `read_excel()`",
+                select: "",
+                explain: "The `readxl` package, specifically the `read_excel()` function, is widely used and recommended for importing data from Excel (.xlsx) files into R.  The `xlsx` package can be used but requires Java, potentially causing compatibility issues.",
+                state: false
+            },
+            {
+                problem: "The first row of your imported CSV file ('medical_records.csv') contains variable names (headers).  How can you ensure R correctly treats these as column headers when importing?",
+                choices: "Use `header = TRUE` within `read.csv()`///Use `row.names = 1` within `read.csv()`///Manually rename the columns after import///Use `skip = 1` within `read.csv()`///Use `colnames = TRUE` within `read.csv()`",
+                answer: "Use `header = TRUE` within `read.csv()`",
+                select: "",
+                explain: "Setting the `header` argument to `TRUE` in the `read.csv()` function instructs R to treat the first row of the file as column headers.",
+                state: false
+            },
+            {
+                problem: "Which encoding is commonly used to ensure consistent character representation across different operating systems and software?",
+                choices: "ASCII///Latin-1///UTF-8///UTF-16///EBCDIC",
+                answer: "UTF-8",
+                select: "",
+                explain: "UTF-8 (Unicode Transformation Format - 8-bit) is a character encoding capable of representing virtually all characters from different languages.  It is widely used to prevent encoding issues when sharing data.",
+                state: false
+            },
+            {
+                problem: "You want to save your analyzed data frame 'results_df' as a CSV file named 'final_analysis.csv'. What is the appropriate R code?",
+                choices: "write(results_df, file = 'final_analysis.csv')///save(results_df, file = 'final_analysis.csv')///dump(results_df, file = 'final_analysis.csv')///write.csv(results_df, file = 'final_analysis.csv')///export(results_df, file = 'final_analysis.csv')",
+                answer: "write.csv(results_df, file = 'final_analysis.csv')",
+                select: "",
+                explain: "`write.csv()` is the function specifically designed to export R data frames into comma-separated value (CSV) files. ",
+                state: false
+            },
+            {
+                problem: "What does 'MCAR' stand for in the context of missing data?",
+                choices: "Missing Completely At Random///Missing Covariates Associated Randomly///Minimal Case Analysis Required///Missing Completely, Assumed Random///Multiple Correlation Analysis Reduced",
+                answer: "Missing Completely At Random",
+                select: "",
+                explain: "MCAR is a missing data mechanism where the probability of data being missing is completely independent of both observed and unobserved variables.",
+                state: false
+            },
+            {
+                problem: "You have a data frame with missing values, and you decide to remove all rows containing any missing values before analysis. This method of handling missing data is called:",
+                choices: "Pairwise deletion///Listwise deletion///Mean imputation///Multiple imputation///Stochastic regression imputation",
+                answer: "Listwise deletion",
+                select: "",
+                explain: "Listwise deletion (or complete case analysis) involves removing entire rows with any missing values. While simple, it can lead to bias if the data is not MCAR and reduce sample size.",
+                state: false
+            },
+            {
+                problem: "Which R package is highly recommended and widely used for performing multiple imputation to handle missing data?",
+                choices: "`mice` (Multivariate Imputation by Chained Equations)///`missMDA` (Missing Data Imputation with Multiple Correspondence Analysis)///`Amelia` (Amelia II: A Program for Missing Data)///`mi` (Multiple Imputation)///`Hmisc` (Harrell Miscellaneous)",
+                answer: "`mice` (Multivariate Imputation by Chained Equations)",
+                select: "",
+                explain: "The `mice` package is a powerful and flexible tool for multiple imputation using chained equations, which is a principled approach to dealing with missing data under specific assumptions.",
+                state: false
+            },
+            {
+                problem: "What is the primary disadvantage of imputing missing data using the mean or median of the observed values for that variable?",
+                choices: "It's computationally very expensive///It tends to underestimate the variance of the variable///It introduces nonlinear relationships into the data///It's not appropriate for categorical variables///It always leads to overfitting of the imputation model",
+                answer: "It tends to underestimate the variance of the variable",
+                select: "",
+                explain: "While mean/median imputation is simple, it reduces the variability of the imputed variable. It makes the data more artificially 'central' than it might be if we had the actual values.",
+                state: false
+            },
+            {
+                problem: "You're working with a dataset on medication adherence. The variable 'side_effects_reported' is likely to have missing values that are 'Missing Not at Random' (MNAR). What does this imply about the missing data mechanism?",
+                choices: "The probability of missingness depends only on observed variables.///The probability of missingness depends on the missing values themselves.///The missing data can be ignored without introducing bias.///Imputation is not necessary for MNAR data.///Multiple imputation is guaranteed to provide unbiased estimates.",
+                answer: "The probability of missingness depends on the missing values themselves.",
+                select: "",
+                explain: "MNAR implies that the reason for missing data in 'side_effects_reported' is related to the unrecorded side effects themselves. For example, patients experiencing severe side effects might be less likely to report them.",
+                state: false
+            },
+            {
+                problem: "Which of the following functions can provide useful information for assessing the extent and pattern of missing data in your R data frame?",
+                choices: "`skim()` from the `skimr` package///`summary()` (base R)///`vis_miss()` from the `visdat` package///Both A and C///All of the above",
+                answer: "All of the above",
+                select: "",
+                explain: "`skim()` from the `skimr` package provides a concise overview of your data, including missing value percentages. `summary()`, by default, shows the number of NA values.  `vis_miss()` creates a helpful visualization of the missingness pattern.",
+                state: false
+            },
+            {
+                problem: "Which data visualization can help you examine the distribution of a continuous variable and identify potential outliers or unusual data points?",
+                choices: "Bar chart///Scatterplot///Boxplot///Histogram///Heatmap",
+                answer: "Histogram",
+                select: "",
+                explain: "Histograms display the frequency distribution of a continuous variable.  The bars represent value ranges (bins), and their heights show how often values fall within those ranges.",
+                state: false
+            },
+            {
+                problem: "In R, a 'for' loop is used to:",
+                choices: "Repeat a block of code a specified number of times///Execute different code blocks based on conditions///Define custom functions///Read data from files line by line///Handle errors in your code",
+                answer: "Repeat a block of code a specified number of times",
+                select: "",
+                explain: "The `for` loop iterates over a sequence or a set of values.  For each iteration, the code within the loop is executed.",
+                state: false
+            },
+            {
+                problem: "You need to calculate the body mass index (BMI) for each patient in your data frame. The BMI is calculated as weight (kg) divided by height (m) squared.  A function would improve the efficiency and organization of your code. What would be the most structured way to define a function for BMI calculation in R?",
+                choices: "`bmi = weight / height ^ 2`///`function(weight, height) { weight / height ^ 2 }`///`bmi <- function(weight, height) { weight / height ^ 2 }`///`bmi <- function() { weight / height ^ 2 }`/// `calc_bmi <- weight / height ^ 2` ",
+                answer: "`bmi <- function(weight, height) { weight / height ^ 2 }`",
+                select: "",
+                explain: "This is the correct structure for defining a function called 'bmi'. It takes 'weight' and 'height' as inputs (arguments) and calculates the BMI.",
+                state: false
+            },
+            {
+                problem: "In hypothesis testing, a p-value is used to:",
+                choices: "Determine the strength of the relationship between variables///Calculate the sample size required for the study///Estimate the probability of observing the data if the null hypothesis were true///Prove the alternative hypothesis is true///Measure the effect size of the observed difference",
+                answer: "Estimate the probability of observing the data if the null hypothesis were true",
+                select: "",
+                explain: "The p-value is a probability value that tells you how likely it is to get results at least as extreme as your observed data, assuming that the null hypothesis is actually correct. ",
+                state: false
+            },
+            {
+                problem: "You are conducting a two-tailed t-test to compare the average blood pressure of a treatment group to a control group. The null hypothesis for this test is:",
+                choices: "The average blood pressures of the two groups are equal.///The average blood pressure of the treatment group is lower than the control group.///The average blood pressure of the treatment group is higher than the control group.///The average blood pressures of the two groups are not equal.///None of the above",
+                answer: "The average blood pressures of the two groups are equal.",
+                select: "",
+                explain: "In a two-tailed t-test comparing means, the null hypothesis always assumes there is NO difference between the groups being compared.  Your alternative hypothesis would be that they are NOT equal.",
+                state: false
+            },
+            {
+                problem: "A p-value less than your pre-determined significance level (often 0.05) typically leads to:",
+                choices: "Accepting the null hypothesis///Rejecting the alternative hypothesis///Failing to reject the null hypothesis///Rejecting the null hypothesis///None of the above",
+                answer: "Rejecting the null hypothesis",
+                select: "",
+                explain: " A small p-value (e.g., p < 0.05) suggests your findings are statistically significant, meaning the data provides strong evidence to reject the null hypothesis and lean towards the alternative hypothesis.",
+                state: false
+            },
+            {
+                problem: "When is a one-tailed t-test more appropriate than a two-tailed t-test?",
+                choices: "When you only want to detect a difference in means, regardless of direction.///When you are interested in any difference between the groups, whether positive or negative.///When you have a directional hypothesis, such as expecting the treatment group to have a higher mean.///When the data is not normally distributed.///When you have a small sample size.",
+                answer: "When you have a directional hypothesis, such as expecting the treatment group to have a higher mean.",
+                select: "",
+                explain: "A one-tailed t-test is appropriate when you have a clear expectation about the direction of the effect (e.g., you predict the treatment group will have higher scores than the control group).",
+                state: false
+            },
+            {
+                problem: "What statistical test is used to compare means between more than two groups?",
+                choices: "T-test///Chi-squared test///Correlation test///ANOVA (Analysis of Variance)///Linear regression",
+                answer: "ANOVA (Analysis of Variance)",
+                select: "",
+                explain: "ANOVA extends the idea of a t-test to compare means of multiple (more than two) groups.  It assesses whether there are statistically significant differences among the group means.",
+                state: false
+            },
+            {
+                problem: "What does 'Quarto' export by default as its output format?",
+                choices: "HTML///PDF///Word document (.docx)///PowerPoint presentation (.pptx)///Plain text (.txt)",
+                answer: "HTML",
+                select: "",
+                explain: "Quarto defaults to HTML output, making your documents easily shareable and viewable in web browsers.",
+                state: false
+            },
+            {
+                problem: "Quarto is based on the syntax and principles of which powerful document creation framework?",
+                choices: "LaTeX///Markdown///reStructuredText///AsciiDoc///HTML",
+                answer: "Markdown",
+                select: "",
+                explain: "Quarto builds upon the ease of use and readability of Markdown syntax while adding advanced features for code integration, cross-referencing, and publication-quality output.",
+                state: false
+            },
+            {
+                problem: "What output format, widely used for presentations, is Quarto currently NOT able to publish directly to?",
+                choices: "Microsoft PowerPoint (.pptx)///Google Slides///OpenDocument Presentation (.odp)///Reveal.js presentations///D3.js visualizations",
+                answer: "Google Slides",
+                select: "",
+                explain: "While Quarto has robust export options, direct publishing to Google Slides is not yet supported. You'd need to export as PDF or HTML and then potentially import into Google Slides.",
+                state: false
+            },
+            {
+                problem: "You are conducting a study to assess the effectiveness of a new drug in lowering blood pressure.  Which type of hypothesis test is MOST appropriate?",
+                choices: "Two-tailed t-test///One-tailed t-test///Chi-squared test///ANOVA///Correlation test",
+                answer: "One-tailed t-test",
+                select: "",
+                explain: "Since you have a directional hypothesis (you expect the drug to *lower* blood pressure), a one-tailed t-test is the most appropriate. A two-tailed test would be used if you were just looking for *any* difference.",
+                state: false
+            },
+            {
+                problem: "A researcher wants to understand if there's a link between smoking habits (smoker/non-smoker) and the occurrence of lung cancer (yes/no) in a dataset.  Which statistical test is suitable?",
+                choices: "Two-tailed t-test///One-tailed t-test///Chi-squared test///ANOVA///Linear regression",
+                answer: "Chi-squared test",
+                select: "",
+                explain: "The Chi-squared test is used to examine the relationship between two categorical variables. Here, we have two categorical variables: smoking habits (smoker/non-smoker) and lung cancer occurrence (yes/no).",
+                state: false
+            },
+            {
+                problem: "If the p-value of your hypothesis test is 0.01, what can you conclude?",
+                choices: "There is a 1% chance that the null hypothesis is true.///There is a 99% chance that the alternative hypothesis is true.///The results are statistically significant, and you would reject the null hypothesis.///The results are not statistically significant, and you would fail to reject the null hypothesis.///You need more information to draw a conclusion.",
+                answer: "The results are statistically significant, and you would reject the null hypothesis.",
+                select: "",
+                explain: "A p-value of 0.01 (which is less than the typical significance level of 0.05) indicates strong evidence against the null hypothesis. We reject the null hypothesis, suggesting that the observed effect is unlikely to have occurred due to random chance.",
+                state: false
+            },
+            {
+                problem: "In the context of R, what does a function return by default if no explicit return value is specified?",
+                choices: "NULL///0///An error message///The last evaluated expression///None of the above",
+                answer: "The last evaluated expression",
+                select: "",
+                explain: "In R, if you don't explicitly use `return()` within a function, the function will automatically return the result of the last expression it evaluated.",
+                state: false
+            },
+            {
+                problem: "You have a dataset with patient ages. To visually explore the distribution of ages, which 'ggplot2' geom would you MOST likely use?",
+                choices: "`geom_point()`///`geom_bar()`///`geom_histogram()`///`geom_boxplot()`///`geom_line()`",
+                answer: "`geom_histogram()`",
+                select: "",
+                explain: "`geom_histogram()` is used to create histograms in ggplot2, which are a standard way to visualize the distribution (frequency) of a single continuous variable like age.",
+                state: false
+            },
+            {
+                problem: "You need to install a package called 'survival' in R for survival analysis. Which command would you use?",
+                choices: "`library(survival)`///`require(survival)`///`install.packages('survival')`///`download.packages('survival')`///`import('survival')`",
+                answer: "`install.packages('survival')`",
+                select: "",
+                explain: "To install a new R package like 'survival' you use `install.packages()` with the package name in quotes.  After installation, you'd use `library(survival)` to load the package.",
+                state: false
+            },
+            {
+                problem: "What R operator is used to subset elements of a vector, matrix, or data frame based on logical conditions or indices?",
+                choices: "`$`///`@`///`[]`///`()`///`~`",
+                answer: "`[]`",
+                select: "",
+                explain: "Square brackets `[]` are the primary means of subsetting in R. They let you select elements based on their position (index) or using logical conditions.",
+                state: false
+            },
+            {
+                problem: "Which R function is used to combine multiple vectors into a single data frame?",
+                choices: "`cbind()`///`rbind()`///`bind_rows()`///`merge()`///`join()`",
+                answer: "`cbind()`",
+                select: "",
+                explain: "While both `cbind()` and `rbind()` can combine vectors into data frames, `cbind()` does so by adding the vectors as *columns*.  `rbind()` adds them as *rows*.",
+                state: false
+            },
+            {
+                problem: "What does the acronym 'Tidy Data' refer to in the context of data science?",
+                choices: "Data that is free from missing values///Data that is formatted for easy printing///Data that adheres to a specific structure for consistent analysis///Data that is securely encrypted///Data that is backed up to prevent loss",
+                answer: "Data that adheres to a specific structure for consistent analysis",
+                select: "",
+                explain: "'Tidy data' is a set of principles that aim to structure datasets in a consistent way, where each variable forms a column, each observation forms a row, and each type of observational unit forms a table.  This structure greatly enhances analysis in R.",
+                state: false
+            },
+            {
+                problem: "Why is the `factor()` function often important when dealing with categorical variables in R?",
+                choices: "It automatically converts character variables to numeric for analysis.///It allows you to perform mathematical operations on categories.///It ensures that the categories are treated as distinct groups, not just text strings.///It sorts the categories alphabetically for better visualization.///It removes duplicate categories, reducing data redundancy.",
+                answer: "It ensures that the categories are treated as distinct groups, not just text strings.",
+                select: "",
+                explain: "The `factor()` function in R is essential for working with categorical data. When you create a factor, you are telling R that the variable's values represent distinct categories or groups, rather than simply being character strings.",
+                state: false
+            }
+        ]; var questions = questions1
+
+        var current_question = {};
+        var score = 0;
+
+        // make function if check box is active then include array in random_question
+        // if not active then remove array from random_question
+        $("input[type='checkbox']").change(function () {
+            $("#feedback").text("");
+            var quiz1 = document.getElementById("quiz1").checked;
+            random_question = [];
+            // reset score = 0 when use check box
+            score = 0;
+            if (quiz1) {
+                random_question = random_question.concat(questions1);
+            }
+            else {
+                random_question = questions;
+            }
+            random_question = random_question.sort(() => Math.random() - 0.5);
+            $("#score").text(" " + "Score: " + score + "/" + random_question.length);
+            $("feedback").text("");
+            questionIndex = 0;
+            showquestion();
+        });
+
+
+        function nextquestion() {
+            if (questionIndex < random_question.length - 1) {
+                questionIndex++;
+                console.log(questionIndex);
+                showquestion();
+                $("#answer").val("");
+                if (random_question[questionIndex].state === false) {
+                    $("#feedback").text("");
+                }
+                else {
+                    $("#feedback").text("Answer : " + " " + random_question[questionIndex].answer);
+                }
+
+            }
+        }
+
+
+        $("#next-question").click(function () {
+            if (!random_question[questionIndex].state) {
+                alert("Please select an answer");
+                return;
+            }
+            else {
+                nextquestion();
+            }
+        });
+
+        function prevquestion() {
+            if (questionIndex > 0) {
+                questionIndex--;
+                console.log(questionIndex);
+                showquestion();
+                $("#answer").val("");
+                $("#feedback").text("Answer : " + " " + random_question[questionIndex].answer);
+            }
+        }
+
+        $("#prev-question").click(function () {
+            prevquestion();
+        });
+
+        function showquestion() {
+            showsubmission(random_question);
+            console.log(random_question);
+            console.log(questionIndex);
+            current_question = random_question[questionIndex];
+            if (current_question.state === true) {
+                $("#question").text(current_question.problem);
+                $("#choices").empty();
+                var choices = current_question.choices.split("///");
+                for (var i = 0; i < choices.length; i++) {
+                    $("#choices").append("<button>" + choices[i] + "</button>");
+                }
+                $("#feedback").empty();
+                if (current_question.select === current_question.answer) {
+                    $("#feedback").addClass("correct");
+                    $("#feedback").text("Correct! : " + " " + current_question.answer);
+                } else {
+                    $("#feedback").text("Incorrect!, Your Ans: " + current_question.select);
+                    $("#feedback").addClass("incorrect");
+                }
+            }
+            else {
+                $("#question").text(current_question.problem);
+                var choices = current_question.choices.split("///");
+                $("#choices").empty();
+                n = choices.length;
+                for (var i = 0; i < n; i++) {
+                    // re arrange choice for each question
+                    var random = Math.floor(Math.random() * choices.length);
+                    $("#choices").append("<button>" + choices[random] + "</button>");
+                    choices.splice(random, 1); // remove choice that already append to button
+
+                }
+            }
+            $("#questionIndex").text(questionIndex + 1);
+        }
+
+        function submitquestion() {
+            var selected = $("button").filter(".selected").text();
+            random_question[questionIndex].select = selected;
+            // check if answer of question is array because some question have multiple answer
+            if (Array.isArray(current_question.answer)) {
+                var correct = false;
+                var i = 0;
+                while (i < current_question.answer.length && !correct) {
+                    if (selected === current_question.answer[i]) {
+                        console.log(current_question.answer[i]);
+                        console.log(selected);
+                        correct = true;
+                        console.log(correct);
+                    }
+                    i++;
+                }
+                if (correct) {
+                    if (random_question[questionIndex].state === false) {
+                        random_question[questionIndex].state = true;
+                        score++;
+                    }
+                    $("#score").text(" " + "Score: " + score + "/" + random_question.length);
+                    $("#feedback").addClass("correct");
+                    $("#feedback").text("Correct!: " + " " + current_question.answer);
+                } else {
+                    random_question[questionIndex].state = true;
+                    $("#feedback").text("Incorrect!, Correct Ans: " + current_question.answer);
+                    $("#feedback").addClass("incorrect");
+                }
+            } else {
+
+                if (selected === current_question.answer) {
+                    if (random_question[questionIndex].state === false) {
+                        random_question[questionIndex].state = true;
+                        score++;
+                    }
+                    $("#score").text(" " + "Score: " + score + "/" + random_question.length);
+                    $("#feedback").addClass("correct");
+                    $("#feedback").text("Correct! : " + " " + current_question.answer);
+                } else {
+                    random_question[questionIndex].state = true;
+                    $("#feedback").text("Incorrect!, Correct Ans: " + current_question.answer);
+                    $("#feedback").addClass("incorrect");
+                }
+            }
+        }
+
+        $("#choices").on("click", "button", function () {
+            $(this).addClass("selected").siblings().removeClass("selected");
+        });
+
+        $("#submit-btn").click(function () {
+            submitquestion();
+        });
+
+        function showsubmission(random_question) {
+            var table = document.querySelector("table");
+            table.innerHTML = ""; // Clear previous content
+
+            // Add header row
+            var headerRow = table.insertRow();
+            headerRow.insertCell(0).innerHTML = "<b>Question</b>"; // Column 1
+            headerRow.insertCell(1).innerHTML = "<b>Correct Answer</b>"; // Column 2
+            headerRow.insertCell(2).innerHTML = "<b>Your Answer</b>";    // Column 3
+            headerRow.insertCell(3).innerHTML = "<b>Explanation</b>";   // Column 4
+
+            // Now add the data rows
+            for (var i = 0; i < random_question.length; i++) {
+                if (random_question[i].state === true &&
+                    random_question[i].select !== random_question[i].answer) {
+
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    var cell4 = row.insertCell(3);
+                    cell1.innerHTML = random_question[i].problem;
+                    cell2.innerHTML = random_question[i].answer;
+                    cell3.innerHTML = random_question[i].select;
+                    cell4.innerHTML = random_question[i].explain;
+                }
+            }
+        }
+
+        check();
+        showquestion();
+    });
+
+</script>
+
+<body>
+    <div class="row">
+        <!-- create 3 checkboxs to choose the question array-->
+        <div class="checkbox-container">
+            <input type="checkbox" id="quiz1" name="quiz1" value="quiz1">
+            <label for="quiz1">R</label>
+
+            <!-- comment small text to show the reference -->
+            <div class="small">หมายเหตุ : เลือกได้ทีละชุด หรือ ถ้าไม่เลือกเลยจะสุ่มจากทุกชุด</div>
+        </div>
+        <div id="quiz-container" class="center-column">
+            <!-- show questionindex -->
+            <h1>Random Quiz ตอนนี้อยู่ข้อ <span id="questionIndex"></span><span id="score"></span>
+            </h1>
+            <p id="question"></p>
+            <div id="choices"></div>
+            <button id="submit-btn">Submit Answer</button>
+            <p id="feedback" onclick="wow"></p>
+            <div class="row">
+                <button id="prev-question">Previous Question</button>
+                <button id="next-question">Next Question</button>
+            </div>
+            <!-- หมายเหตุ -->
+            <!-- <div class="small">ref. mdkkudatabase</div> -->
+        </div>
+        <!-- create table to show the submission -->
+        <table>
+            <tr>
+                <th>Question</th>
+                <th>Correct Answer</th>
+                <th>Your Answer</th>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
